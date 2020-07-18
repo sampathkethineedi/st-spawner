@@ -1,5 +1,5 @@
 import streamlit as st
-from dev.client import list_containers, list_cameras, register_camera, camera_info, container_start
+from client.spawner_api import list_containers, list_cameras, register_camera, camera_info, container_start
 
 
 st.write('## Running cameras')
