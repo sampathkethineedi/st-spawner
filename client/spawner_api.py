@@ -4,50 +4,62 @@ import pandas as pd
 import streamlit as st
 
 SPAWNER_API = "http://cvision-516524912.us-east-1.elb.amazonaws.com/spawner-api/"
-headers = {"X-API-KEY": "cvision2020", 'content-type': 'application/json'}
+headers = {"spawner-api-key": None, 'content-type': 'application/json'}
 
 
-def list_containers():
+def list_containers(password):
+    headers["spawner-api-key"] = password
     data = pd.DataFrame(columns=['camera_id', 'container_id'])
-    response = requests.get(url=SPAWNER_API+'container_list', headers=headers).json()
+    response = requests.get(url=SPAWNER_API+'containers/list', headers=headers).json()
 
-    data['camera_id'] = response['cam_running']
+    data['camera_id'] = response['camera_ids']
     data['container_id'] = response['container_ids']
 
     return data
 
 
-@st.cache
-def list_cameras():
+def list_cameras(password):
+    headers["X-API-KEY"] = password
     data = pd.DataFrame(columns=['camera_id'])
-    response = requests.get(url=SPAWNER_API + 'register_camera', headers=headers).json()
-    data['camera_id'] = response['registered_cameras']
+    response = requests.get(url=SPAWNER_API + 'cameras/info/all/cam_id', headers=headers).json()
+    data['camera_id'] = response
     return data
 
 
-@st.cache
-def register_camera(camera_id, camera_url, start, stop, info):
-    entry_points = start + '#' + stop
+def register_camera(password, camera_id, camera_url, entry_points=None, floor_points=None, info="information"):
+    headers["X-API-KEY"] = password
 
-    body = json.dumps({"cam_id": camera_id, "cam_url": camera_url, "entry_points": entry_points, "info": info})
+    body = json.dumps({"cam_id": camera_id, "cam_url": camera_url,
+                       "entry_points": entry_points, "floor_points": floor_points, "info": info})
 
-    response = requests.post(url=SPAWNER_API+'register_camera', headers=headers, data=body)
+    response = requests.post(url=SPAWNER_API+'cameras/register', headers=headers, data=body)
 
     # print(response.json())
 
     return response.json()
 
 
-@st.cache
-def camera_info(camera_id):
+def camera_info(password, camera_id: str):
+    headers["X-API-KEY"] = password
 
     body = json.dumps({"cam_id": camera_id})
-    response = requests.post(url=SPAWNER_API + 'camera_info', headers=headers, data=body).json()
+    response = requests.get(url=SPAWNER_API + 'cameras/info/'+camera_id, headers=headers).json()
 
     return response
 
 
-def container_start(camera_id):
+def delete_camera(password, camera_id: str):
+    headers["X-API-KEY"] = password
+    response = requests.get(url=SPAWNER_API + 'cameras/delete/'+camera_id, headers=headers).json()
+
+    if "message" in response.keys():
+        return response["message"]
+    else:
+        return None
+
+
+def container_start(password, camera_id):
+    headers["X-API-KEY"] = password
     body = json.dumps({"cam_id": camera_id})
     response = requests.post(url=SPAWNER_API + 'container_start', headers=headers, data=body).text
 
