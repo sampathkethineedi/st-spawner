@@ -9,8 +9,8 @@ config = config.Settings()
 # Creating a session
 session = st.State()
 if not session:
-    session.authenticated=False
-    session.password=''
+    session.authenticated = False
+    session.api_key = ''
 
 
 # Authentication Funciton
@@ -23,7 +23,7 @@ def auth():
     if password:   
         if password == config.API_KEY:
             infoBlock = st.success("Authorization complete")
-            session.password = password
+            session.api_key = config.API_KEY
             session.authenticated = True
             time.sleep(.5)
             # Clearing screen
@@ -36,8 +36,8 @@ def auth():
 
 
 def displayRunningCams(block):
-    block.empty() # clearing existing data
-    data = list_containers(session.password)
+    block.empty()  # clearing existing data
+    data = list_containers(session.api_key)
     if not data.empty :
         block.table(data.assign(hack='').set_index('hack'))
     else:
@@ -47,7 +47,7 @@ def displayRunningCams(block):
 # Running Cameras
 def showRunningCameras():
     st.write('# Running cameras')
-    block=st.empty()
+    block = st.empty()
     block.info('Please Refresh')
     runningCameraBlock = st.empty()  # Placeholder for the table
     if st.sidebar.button('Refresh Data'):
@@ -70,26 +70,26 @@ def registerCamera():
 
     if st.button(label='Register'):
         # REGISTER CAMERA
-        msg = register_camera(session.password, camera_id, camera_url, entry_points, floor_points, info)
+        msg = register_camera(session.api_key, camera_id, camera_url, entry_points, floor_points, info)
         st.json(msg)
 
 
 # Manage Cameras
 def listCameras():
     block = st.empty()
-    data = list_cameras(session.password)
+    data = list_cameras(session.api_key)
 
     block.table(data.assign(hack='').set_index('hack'))
     if st.sidebar.button("Reload Data"):
         block.empty()
-        data = list_cameras(session.password)
+        data = list_cameras(session.api_key)
         block.table(data.assign(hack='').set_index('hack'))
 
 
 def deleteCameras():
     cam_id_ = st.text_input(label="Enter Camera ID. 'ALL' to delete all keys")
     if st.button(label="Delete"):
-        msg = delete_camera(session.password, cam_id_)
+        msg = delete_camera(session.api_key, cam_id_)
         st.success(msg)
 
 
@@ -97,7 +97,7 @@ def startProcess():
 
     cam_id = st.text_input(label='Camera ID')
     if cam_id:
-        response = camera_info(session.password, cam_id)
+        response = camera_info(session.api_key, cam_id)
         st.write("## Camera Info")
         st.json(response)
 
@@ -107,7 +107,7 @@ def startProcess():
             process_stack.append('person_counter')
 
         if st.checkbox(label='Socail Distancing'):
-                process_stack.append('social_distancing')
+            process_stack.append('social_distancing')
 
         if st.checkbox(label='Config override'):
             config = st.text_input(label='Enter configuration')
@@ -117,7 +117,7 @@ def startProcess():
         st.write("## Current Selection")
         st.write(process_stack)
         if st.button("Start Process"):
-            response = container_start(session.password, cam_id, process_stack)
+            response = container_start(session.api_key, cam_id)
             st.code(response)
 
     else: 
@@ -147,6 +147,7 @@ def main():
             elif manageOption == 'Start A Process':
                 #st.write("## Start A Process")
                 startProcess()
+
 
 # Authentication
 auth()
