@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 import st_state_patch
-from client.spawner_api import list_containers, list_cameras, register_camera, camera_info, container_start, delete_camera
+from client.spawner_api import *
 import config
 
 config = config.Settings()

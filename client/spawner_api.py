@@ -1,12 +1,12 @@
 import requests
 import json
 import pandas as pd
-import streamlit as st
 import config
 
 config = config.Settings()
 
 SPAWNER_API = config.API_URL
+
 headers = {"spawner-api-key": None, 'content-type': 'application/json'}
 
 

@@ -4,6 +4,6 @@
 from pydantic import BaseSettings
 
 
-class Config(BaseSettings):
+class Settings(BaseSettings):
     API_KEY: str = ""
     API_URL: str = ""
