@@ -2,8 +2,11 @@ import requests
 import json
 import pandas as pd
 import streamlit as st
+import config
 
-SPAWNER_API = "http://cvision-516524912.us-east-1.elb.amazonaws.com/spawner-api/"
+config = config.Settings()
+
+SPAWNER_API = config.API_URL
 headers = {"spawner-api-key": None, 'content-type': 'application/json'}
 
 
@@ -58,9 +61,9 @@ def delete_camera(password, camera_id: str):
         return None
 
 
-def container_start(password, camera_id):
+def container_start(password, camera_id, process_stack):
     headers["X-API-KEY"] = password
-    body = json.dumps({"cam_id": camera_id})
-    response = requests.post(url=SPAWNER_API + 'container_start', headers=headers, data=body).text
+    body = json.dumps({"cam_id": camera_id, "process_stack": '#'.join(process_stack)})
+    response = requests.post(url=SPAWNER_API + 'containers/start/'+camera_id, headers=headers, data=body).text
 
     return response
