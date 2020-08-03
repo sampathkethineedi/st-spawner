@@ -84,7 +84,11 @@ def listCameras():
         block.empty()
         data = list_cameras(session.api_key)
         block.table(data.assign(hack='').set_index('hack'))
-
+    st.write("## Camera Info")
+    cam_id = st.text_input(label='Camera ID')
+    if cam_id:
+        response = camera_info(session.api_key, cam_id)
+        st.json(response)
 
 def deleteCameras():
     cam_id_ = st.text_input(label="Enter Camera ID. 'ALL' to delete all keys")
