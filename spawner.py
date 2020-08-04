@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 import st_state_patch
-from client.spawner_api import *
+from client import spawner_api
 import config
 
 config = config.Settings()
@@ -10,7 +10,7 @@ config = config.Settings()
 session = st.State()
 if not session:
     session.authenticated = False
-    session.api_key = ''
+    session.api_key = None
 
 
 # Authentication Funciton
@@ -35,9 +35,9 @@ def auth():
         st.error("Password Required")
 
 
-def displayRunningCams(block):
+def display_running_cams(block):
     block.empty()  # clearing existing data
-    data = list_containers(session.api_key)
+    data = spawner_api.list_containers(session.api_key)
     if not data.empty :
         block.table(data.assign(hack='').set_index('hack'))
     else:
@@ -45,18 +45,18 @@ def displayRunningCams(block):
 
 
 # Running Cameras
-def showRunningCameras():
+def show_running_cameras():
     st.write('# Running cameras')
     block = st.empty()
     block.info('Please Refresh')
     runningCameraBlock = st.empty()  # Placeholder for the table
     if st.sidebar.button('Refresh Data'):
         block.empty()
-        displayRunningCams(runningCameraBlock)
+        display_running_cams(runningCameraBlock)
 
 
 # Register a camera
-def registerCamera():
+def register_camera():
     st.write('# Register Camera')
     camera_id = st.text_input(label='Enter Camera ID')
     camera_url = st.text_input(label='Enter Camera URL')
@@ -70,38 +70,39 @@ def registerCamera():
 
     if st.button(label='Register'):
         # REGISTER CAMERA
-        msg = register_camera(session.api_key, camera_id, camera_url, entry_points, floor_points, info)
+        msg = spawner_api.register_camera(session.api_key, camera_id, camera_url, entry_points, floor_points, info)
         st.json(msg)
 
 
 # Manage Cameras
-def listCameras():
+def list_cameras():
     block = st.empty()
-    data = list_cameras(session.api_key)
+    data = spawner_api.list_cameras(session.api_key)
 
     block.table(data.assign(hack='').set_index('hack'))
     if st.sidebar.button("Reload Data"):
         block.empty()
-        data = list_cameras(session.api_key)
+        data = spawner_api.list_cameras(session.api_key)
         block.table(data.assign(hack='').set_index('hack'))
     st.write("## Camera Info")
     cam_id = st.text_input(label='Camera ID')
     if cam_id:
-        response = camera_info(session.api_key, cam_id)
+        response = spawner_api.camera_info(session.api_key, cam_id)
         st.json(response)
 
-def deleteCameras():
+
+def delete_cameras():
     cam_id_ = st.text_input(label="Enter Camera ID. 'ALL' to delete all keys")
     if st.button(label="Delete"):
-        msg = delete_camera(session.api_key, cam_id_)
+        msg = spawner_api.delete_camera(session.api_key, cam_id_)
         st.success(msg)
 
 
-def startProcess():
+def start_process():
 
     cam_id = st.text_input(label='Camera ID')
     if cam_id:
-        response = camera_info(session.api_key, cam_id)
+        response = spawner_api.camera_info(session.api_key, cam_id)
         st.write("## Camera Info")
         st.json(response)
 
@@ -121,7 +122,7 @@ def startProcess():
         st.write("## Current Selection")
         st.write(process_stack)
         if st.button("Start Process"):
-            response = container_start(session.api_key, cam_id)
+            response = spawner_api.container_start(session.api_key, cam_id)
             st.code(response)
 
     else: 
