@@ -129,8 +129,5 @@ dmypy.json
 .pyre/
 
 #Custom
-model_files
-*.csv
-*.pdf
-*.bin
+config.py
 
