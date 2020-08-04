@@ -13,14 +13,16 @@ if not session:
     session.api_key = None
 
 
-# Authentication Funciton
 def auth():
+    """Authentication
+
+    :return:
+    """
     if session.authenticated:
         return True
     textInputBlock = st.empty()
     password = textInputBlock.text_input(label='Enter Password', type='password')
-    
-    if password:   
+    if password:
         if password == config.API_KEY:
             infoBlock = st.success("Authorization complete")
             session.api_key = config.API_KEY
@@ -36,9 +38,14 @@ def auth():
 
 
 def display_running_cams(block):
+    """Running camera containers
+
+    :param block:
+    :return:
+    """
     block.empty()  # clearing existing data
     data = spawner_api.list_containers(session.api_key)
-    if not data.empty :
+    if not data.empty:
         block.table(data.assign(hack='').set_index('hack'))
     else:
         st.error('No running cameras found')
@@ -46,6 +53,10 @@ def display_running_cams(block):
 
 # Running Cameras
 def show_running_cameras():
+    """Show running cameras
+
+    :return:
+    """
     st.write('# Running cameras')
     block = st.empty()
     block.info('Please Refresh')
@@ -55,8 +66,11 @@ def show_running_cameras():
         display_running_cams(runningCameraBlock)
 
 
-# Register a camera
 def register_camera():
+    """Camera registration
+
+    :return:
+    """
     st.write('# Register Camera')
     camera_id = st.text_input(label='Enter Camera ID')
     camera_url = st.text_input(label='Enter Camera URL')
@@ -66,7 +80,8 @@ def register_camera():
     st.write("> ###### Entry points, *follow this format* `223#556#330#100` from line start to stop")
     
     floor_points = st.text_input(label='Floor Points')
-    st.write("> ###### Floor points, *follow this format* `223#556#330#100#223#556#330#100` from lower right in clockwise")
+    st.write("> ###### Floor points, *follow this format* "
+             "`223#556#330#100#223#556#330#100` from lower right in clockwise")
 
     if st.button(label='Register'):
         # REGISTER CAMERA
@@ -74,8 +89,11 @@ def register_camera():
         st.json(msg)
 
 
-# Manage Cameras
 def list_cameras():
+    """List registered cameras
+
+    :return:
+    """
     block = st.empty()
     data = spawner_api.list_cameras(session.api_key)
 
@@ -92,6 +110,10 @@ def list_cameras():
 
 
 def delete_cameras():
+    """Delete camera
+
+    :return:
+    """
     cam_id_ = st.text_input(label="Enter Camera ID. 'ALL' to delete all keys")
     if st.button(label="Delete"):
         msg = spawner_api.delete_camera(session.api_key, cam_id_)
@@ -99,6 +121,10 @@ def delete_cameras():
 
 
 def start_process():
+    """Strt camera container
+
+    :return:
+    """
 
     cam_id = st.text_input(label='Camera ID')
     if cam_id:
@@ -115,17 +141,18 @@ def start_process():
             process_stack.append('social_distancing')
 
         if st.checkbox(label='Config override'):
-            config = st.text_input(label='Enter configuration')
+            # config = st.text_input(label='Enter configuration')
             st.write("##### Configuration to override default, *follow this format*")
             st.write(''' > `{ "nms_threshold": 0.5, "confidence_thresh": 0.4}` ''')
 
         st.write("## Current Selection")
         st.write(process_stack)
         if st.button("Start Process"):
-            response = spawner_api.container_start(session.api_key, cam_id)
+            process_stack = '#'.join(process_stack)
+            response = spawner_api.container_start(session.api_key, cam_id, process_stack, stable=True)
             st.code(response)
 
-    else: 
+    else:
         st.error('Please enter camera-id')
 
 
@@ -133,25 +160,25 @@ def main():
     if session.authenticated:
         st.sidebar.title("Argus Spawner API")
         appMode = st.sidebar.selectbox("Choose the app mode",
-            ["Show Running Cameras", "Register A Camera", "Manage Cameras"])
-        
-        if appMode =='Show Running Cameras':
-            showRunningCameras()
-        elif appMode =='Register A Camera':
-            registerCamera()
+                                       ["Show Running Cameras", "Register A Camera", "Manage Cameras"])
+
+        if appMode == 'Show Running Cameras':
+            show_running_cameras()
+        elif appMode == 'Register A Camera':
+            register_camera()
         elif appMode == 'Manage Cameras':
             manageOption = st.sidebar.radio("Select an option",
-            ('List Cameras', 'Delete Cameras', 'Start A Process'))
+                                            ('List Cameras', 'Delete Cameras', 'Start A Process'))
             st.write('# Manage Cameras')
-            if manageOption=='List Cameras':
+            if manageOption == 'List Cameras':
                 st.write('## List all registered cameras')
-                listCameras()
+                list_cameras()
             elif manageOption == 'Delete Cameras':
                 st.write('## Delete Cameras')
-                deleteCameras()
+                delete_cameras()
             elif manageOption == 'Start A Process':
-                #st.write("## Start A Process")
-                startProcess()
+                # st.write("## Start A Process")
+                start_process()
 
 
 # Authentication
