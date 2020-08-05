@@ -121,4 +121,3 @@ def container_logs(api_key: str, container_id: str):
     data['logs_latest'] = response['logs_latest']
 
     return data
-

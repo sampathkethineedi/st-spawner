@@ -65,7 +65,6 @@ def show_running_cameras():
         block.empty()
         display_running_cams(runningCameraBlock)
 
-
 def register_camera():
     """Camera registration
 
@@ -155,12 +154,27 @@ def start_process():
     else:
         st.error('Please enter camera-id')
 
-
+def get_logs():
+    st.write("# Log Viewer")
+    container_id_input = st.text_input("Enter Container ID")
+    block = st.empty()
+    if container_id_input:
+        view_mode = st.sidebar.radio("Select Viewing Mode",
+        ('View All Logs', 'View Logs By Lines', 'View Latest'))
+        data = spawner_api.container_logs(session.api_key, container_id_input)
+        if view_mode == 'View All Logs':
+            block.write(data['logs_raw'])
+        elif view_mode == 'View Logs By Lines':
+            block.write(data['logs_lines'])
+        elif view_mode == 'View Latest':
+            block.write(data['logs_latest'])
+    
+    
 def main():
     if session.authenticated:
         st.sidebar.title("Argus Spawner API")
         appMode = st.sidebar.selectbox("Choose the app mode",
-                                       ["Show Running Cameras", "Register A Camera", "Manage Cameras"])
+                                       ["Show Running Cameras", "Register A Camera", "Manage Cameras", "Log Viewer"])
 
         if appMode == 'Show Running Cameras':
             show_running_cameras()
@@ -179,6 +193,8 @@ def main():
             elif manageOption == 'Start A Process':
                 # st.write("## Start A Process")
                 start_process()
+        elif appMode == 'Log Viewer':
+            get_logs()
 
 
 # Authentication
