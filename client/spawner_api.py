@@ -105,7 +105,8 @@ def container_start(api_key: str, camera_id: str, process_stack: str, stable: bo
 
     return response.json()
 
-def container_logs(api_key: str,container_id : str):
+
+def container_logs(api_key: str, container_id: str):
     """Show Container Logs
 
     :param api_key:
