@@ -162,7 +162,8 @@ def get_logs():
         view_mode = st.sidebar.radio("Select Viewing Mode", ('View Logs By Lines', 'View Latest'))
         data = spawner_api.container_logs(session.api_key, container_id_input)
         if view_mode == 'View Logs By Lines':
-            st.code(data['logs_lines'])
+            for line in data['logs_lines']:
+                st.code(line)
         elif view_mode == 'View Latest':
             st.code(data['logs_latest'][0])
     
