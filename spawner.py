@@ -138,7 +138,7 @@ def start_process():
             process_stack.append('person_counter')
 
         if st.checkbox(label='Socail Distancing'):
-            process_stack.append('social_distancing')
+            process_stack.append('social_distance')
 
         if st.checkbox(label='Config override'):
             # config = st.text_input(label='Enter configuration')

@@ -104,3 +104,21 @@ def container_start(api_key: str, camera_id: str, process_stack: str, stable: bo
     response = requests.post(url=SPAWNER_API + 'containers/start/', headers=headers, data=body)
 
     return response.json()
+
+
+def container_logs(api_key: str, container_id: str):
+    """Show Container Logs
+
+    :param api_key:
+    :param container_id:
+    :return: dataframe with logs
+    """
+    headers["spawner-api-key"] = api_key
+    data = pd.DataFrame(columns=['logs_raw', 'logs_lines', 'logs_latest'])
+    response = requests.get(url=SPAWNER_API+'containers/logs/'+container_id, headers=headers).json()
+    data['logs_raw'] = response['logs_raw']
+    data['logs_lines'] = response['logs_lines']
+    data['logs_latest'] = response['logs_latest']
+
+    return data
+
