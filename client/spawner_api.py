@@ -80,22 +80,43 @@ def list_containers(api_key: str):
     :return:
     """
     headers["spawner-api-key"] = api_key
-    data = pd.DataFrame(columns=['camera_id', 'container_id'])
+    data = pd.DataFrame(columns=['camera_id', 'process_stack', 'container_id'])
     response = requests.get(url=SPAWNER_API+'containers/list', headers=headers).json()
     data['camera_id'] = response['camera_ids']
+    data['process_stack'] = response['process_stack']
     data['container_id'] = response['container_ids']
 
     return data
 
 
-def container_start(api_key: str, camera_id: str):
+def container_start(api_key: str, camera_id: str, process_stack: str, stable: bool = True):
     """Start a container process for a registered camera
 
     :param api_key:
     :param camera_id:
+    :param process_stack:
+    :param stable:
     :return:
     """
     headers["spawner-api-key"] = api_key
-    response = requests.get(url=SPAWNER_API + 'containers/start/'+camera_id, headers=headers,).text
+    body = {"cam_id": camera_id, "stable": stable, "process_stack": process_stack}
+    body = json.dumps(body)
+    response = requests.post(url=SPAWNER_API + 'containers/start/', headers=headers, data=body)
 
-    return response
+    return response.json()
+
+def container_logs(api_key: str,container_id : str):
+    """Show Container Logs
+
+    :param api_key:
+    :param container_id:
+    :return: dataframe with logs
+    """
+    headers["spawner-api-key"] = api_key
+    data = pd.DataFrame(columns=['logs_raw', 'logs_lines', 'logs_latest'])
+    response = requests.get(url=SPAWNER_API+'containers/logs/'+container_id, headers=headers).json()
+    data['logs_raw'] = response['logs_raw']
+    data['logs_lines'] = response['logs_lines']
+    data['logs_latest'] = response['logs_latest']
+
+    return data
