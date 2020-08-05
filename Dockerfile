@@ -7,4 +7,4 @@ WORKDIR /app
 
 RUN pip install streamlit
 
-CMD streamlit run spawner.py --server.port 7000
+CMD streamlit run spawner.py --server.port 7000 --server.baseUrlPath "/st-spawner"
